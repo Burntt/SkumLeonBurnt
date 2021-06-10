@@ -7,8 +7,6 @@ import config
 
 binance_key = config.authenticate._binance_key
 binance_secret = config.authenticate._binance_secret
-
-
 client = Client(binance_key, binance_secret)
 
 

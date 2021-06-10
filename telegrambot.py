@@ -1,9 +1,10 @@
 import requests
 import config
 from datetime import datetime
-from telegram.ext import *
 import subprocess
+from telegram.ext import *
 
+import exchange
 
 telegram_api_key = config.authenticate._telegram_key
 
@@ -28,17 +29,21 @@ def sample_responses(input_text):
 print('Bot started...')
 
 
-def start_command(update, context):
-    update.message.reply_text('Type something random to get started!')
+def help_command(update, context):
+    send_msg('/skumleon for booting the crypto bot \n'
+             '/balance for checking your currend USD-M futures balance')
 
 
-def rebootSkumLeon(update, context):
+def rebootSkumLeon_command(update, context):
     send_msg('TelegramBot orders start subprocess: SkumLeonBot')
     SkumLeon = subprocess.Popen(['python3', 'openTwitterStream.py'])
 
 
-def help_command(update, context):
-    send_msg('/reboot for booting or rebooting the crypto trade bot')
+def getFuturesBalance_command(update, context):
+    currency = exchange.client.futures_account_balance()[1]['asset']
+    balance = exchange.client.futures_account_balance()[1]['balance']
+    print(currency, balance)
+    send_msg('Your current balance in ' + currency + ' is ' + balance + ' $$')
 
 
 def handle_message(update, context):
@@ -48,8 +53,7 @@ def handle_message(update, context):
 
 
 def send_msg(text):
-    chat_id = '1346459589'
-    #chat_id = '-588603813'
+    chat_id = '-588603813'
     url_req = 'https://api.telegram.org/bot' + telegram_api_key + '/sendMessage' + '?chat_id=' + chat_id + '&text=' + text
     results = requests.get(url_req)
     print('Send a message to Telegram')
@@ -66,12 +70,13 @@ def launchBot():
 
     # Dispatcher
     dp = updater.dispatcher
-    dp.add_handler(CommandHandler('start', start_command))
-    dp.add_handler(CommandHandler('reboot', rebootSkumLeon))
+
+    # Command Center
     dp.add_handler(CommandHandler('help', help_command))
+    dp.add_handler(CommandHandler('skumleon', rebootSkumLeon_command))
+    dp.add_handler(CommandHandler('balance', getFuturesBalance_command))
 
     dp.add_handler(MessageHandler(Filters.text, handle_message))
-
     dp.add_error_handler(error)
 
     updater.start_polling()
@@ -83,5 +88,6 @@ if __name__ == "__main__":
     try:
         launchBot()
     except Exception as e:
+        print(str(e))
         print('TelegramBot Crashed, re-running it')
         launchBot()

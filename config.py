@@ -4,25 +4,20 @@ from binance.client import Client, BinanceAPIException
 # 1364153410774323201 = @GortBerend
 # https://tweeterid.com/
 
-pick_twitter_account = 'Staging'
+pick_twitter_account = 'Berend'
 
-if pick_twitter_account == 'Staging':
-    twitter_id = 1389249951910268935
-    callbackRate = 1
-    leverage = 20
-    position_ratio = 0.01
-if pick_twitter_account == 'Production':
+if pick_twitter_account == 'Berend':
+    DEFAULT_FNAME = "auth.txt"
     twitter_id = 1364153410774323201
     callbackRate = 1
     leverage = 20
-    position_ratio = 0.01
+    position_ratio = 0.001
 if pick_twitter_account == 'Elon':
+    DEFAULT_FNAME = "auth.txt"
     twitter_id = 44196397
     callbackRate = 1
     leverage = 20
     position_ratio = 0.5
-
-DEFAULT_FNAME = "auth_staging.txt"
 
 
 class CredentialHandler(object):
