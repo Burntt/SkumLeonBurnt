@@ -7,6 +7,7 @@ import config
 import exchange
 import itertools
 import telegrambot
+from dogevision import fromImageUrlToProbability
 
 consumer_key = config.authenticate._twitter_key
 secret_key = config.authenticate._twitter_secret
@@ -74,12 +75,16 @@ def delete_all_rules(rules):
     print(json.dumps(response.json()))
 
 
-def checker(string_text, list_perms):
+def buy_doge_on_binance():
+    exchange.set_market_order('DOGE')
+    exchange.set_trailing_stop_loss('DOGE')
+    print('Doge found, order sent')
+
+
+def checker(string_text, list_perms, prob_doge):
     plain_text = string_text.replace(' ', '').lower()
-    if any(word in plain_text for word in list_perms):  # checking for doge
-        exchange.set_market_order('DOGE')
-        exchange.set_trailing_stop_loss('DOGE')
-        print('Doge found, order sent')
+    if (any(word in plain_text for word in list_perms)) or prob_doge > 0.9:  # checking for doge
+        buy_doge_on_binance()
 
 
 def create_url():
@@ -113,8 +118,19 @@ def stream_connect(token, list_perms):
         for response_line in response.iter_lines():
             if response_line:
                 tweet = json.loads(response_line)
+                print(tweet)
                 tweet_txt = tweet['data']['text']
-                # checker(tweet_txt, list_perms)
+                if 'includes' in tweet.keys():
+                    tweet_image_url = tweet['includes']['media'][0]['url']
+                    probability_doge_related = fromImageUrlToProbability(tweet_image_url)[1]
+                    telegrambot.send_msg('##### DOGE MEME DETECTED #####'
+                                         'Probability Meme Doge Related: '
+                                         + str(probability_doge_related) + '%')
+                if probability_doge_related:
+                    checker(tweet_txt, list_perms, probability_doge_related)
+                else:
+                    probability_doge_related = 0
+                    checker(tweet_txt, list_perms, probability_doge_related)
                 telegrambot.send_msg('Tweet trigger: ' + tweet_txt)
 
 
