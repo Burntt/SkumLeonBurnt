@@ -108,6 +108,7 @@ def stream_connect(token, list_perms):
                       stream=True) as response:
         print(response.status_code)
         telegrambot.send_msg('Status Code: ' + str(response))
+
         if response.status_code != 200:
             raise Exception(
                 "Cannot get stream (HTTP {}): {}".format(
@@ -123,9 +124,6 @@ def stream_connect(token, list_perms):
                 if 'includes' in tweet.keys():
                     tweet_image_url = tweet['includes']['media'][0]['url']
                     probability_doge_related = fromImageUrlToProbability(tweet_image_url)[1]
-                    telegrambot.send_msg('##### DOGE MEME DETECTED #####'
-                                         'Probability Meme Doge Related: '
-                                         + str(probability_doge_related) + '%')
                 if probability_doge_related:
                     checker(tweet_txt, list_perms, probability_doge_related)
                 else:
@@ -150,7 +148,7 @@ def main():
     print('Opened Twitter Stream')
     while True:
         stream_connect(token, list_perms)
-        time.sleep(25)
+        time.sleep(30)
         # time.sleep(2 ** timeout)
         # timeout += 1
 
